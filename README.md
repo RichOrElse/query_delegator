@@ -20,7 +20,75 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Query objects inherit from `QueryDelegator` class, they typically live under `app/queries` directory.
+Naming convention suggests adding a `Query` suffix to query object class names.
+Alternatively prefixing class names with words like `By` is shorter and reads more naturally.
+
+```ruby
+class ByEmail < QueryDelegator
+  def call(email)
+    at(email).first
+  end
+
+  def at(email)
+    where(email: email.to_s.downcase)
+  end
+
+  def be(email)
+    return all unless email.blank?
+
+    at email
+  end
+end
+```
+
+Wrap scopes outside ActiveRecord models.
+
+```ruby
+@user = ByEmail.new(User).("john.doe@example.test")
+@contacts = @user.contacts.then(&ByEmail).be(params[:email])
+```
+
+Wrap scopes inside ActiveRecord models.
+
+```ruby
+class User < ApplicationRecord
+  has_many :contacts
+  scope :by_email, ByEmail
+end
+
+class Contact < ApplicationRecord
+  belong_to :user
+  scope :by_email, ByEmail
+end
+
+@user = User.by_email.("john.doe@example.test")
+@contacts = @user.contacts.by_email.be(params[:email])
+```
+
+### QueryDelegator::[]
+
+Delegates Active Record scope to a query object method.
+Intended for association and named scopes, it accepts a query object's method name and returns a `Proc`.
+
+```ruby
+class User < ApplicationRecord
+  has_many :contacts, ByCreated[:recently]
+  scope :since, ByCreated[:since]
+end
+
+class ByCreated < QueryDelegator
+  def recently
+    order(created_at: :desc)
+  end
+
+  def since(timestamp)
+    where table[:created_at].gteq(timestamp)
+  end
+end
+
+@users = User.since 1.year.ago
+```
 
 ## Development
 
