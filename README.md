@@ -90,6 +90,42 @@ end
 @users = User.since 1.year.ago
 ```
 
+### QueryDelegator::Be
+
+To add the helper method `be`, include this module in your query object class like so:
+
+```ruby
+class ByPublished < QueryDelegator
+  include Be
+
+  def be_draft
+    on nil
+  end
+
+  def be_published
+    where.not(published_on: nil)
+  end
+
+  def on(date)
+    where(published_on: date)
+  end
+end
+```
+
+#### be
+
+Given a name, method `be` invokes another method prefixed with `be_`, otherwise
+returns `none` by default or
+returns `all` given a blank name.
+
+```ruby
+@books = @author.books.then(&ByPublished)
+@books.be(['draft'])  # returns books without publish date
+@books.be(:published) # returns books with publish date
+@books.be('unknown')  # returns none
+@books.be(nil)        # returns all books
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
