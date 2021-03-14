@@ -1,6 +1,7 @@
 require "active_support/core_ext/module/delegation"
 require "active_support/core_ext/object"
 require "query_delegator/version"
+require "query_delegator/memory_fetching"
 require "query_delegator/be"
 
 class QueryDelegator

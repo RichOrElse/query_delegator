@@ -126,6 +126,63 @@ returns `all` given a blank name.
 @books.be(nil)        # returns all books
 ```
 
+### QueryDelegator::MemoryFetching
+
+Provides convenient methods intended to retrieve loaded records from memory,
+instead of running queries from the database.
+Include this module in your query object classes like so:
+
+```ruby
+class ByColor < QueryDelegator
+  include MemoryFetching
+
+  def fetch_by_color(color)
+    fetch -> { |by| by.color == color }
+  end
+end
+
+ByEmail.include QueryDelegator::MemoryFetching
+```
+
+#### fetch
+
+This helper method retrieves the first record that meets the condition, otherwise
+returns either the given block value or the optional default value which is `nil`.
+
+```ruby
+@vehicles = Vehicle.then(&ByColor)
+@vehicles.fetch_by_color 'red'                               # returns a red Vehicle record
+@vehicles.fetch(-> v { v.color == 'gold'}                    # returns nil
+@vehicles.fetch(proc { |v| v.color == 'gold'}, NoVehicle)    # returns NoVehicle
+@vehicles.fetch(proc { |v| v.color == 'gold'}) { NoVehicle } # returns NoVehicle
+@vehicles.fetch(Car)                                         # returns a Car record
+```
+
+#### fetch_or_new
+
+This method also [fetches](#fetch) a record that meets the condition, otherwise loads a new record with `Hash` from the argument condition.
+Given a block, it instead fetches a record that meets the block condition.
+
+```ruby
+class HasEmailOrPhone < SimpleDelegator
+  def ===(contact)
+    contact.email == email || contact.phone == phone
+  end
+
+  def to_h
+    { full_name: full_name, email: email, phone: phone }
+  end
+end
+
+@user_contacts = ByEmail.new(@user.contacts)
+
+# Returns a Contact with the same customer name or email.
+@customer_contact = @user_contacts.fetch_or_new(HasEmailOrPhone[@customer])
+
+# Either fetch primary Contact or load a new Contact with the specified email.
+@primary_contact = @user_contacts.fetch_or_new(email: "john.doe@example.test", &:primary?)
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
