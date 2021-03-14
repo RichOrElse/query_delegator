@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Ritchie Paul Buitre"]
   spec.email         = ["ritchie@richorelse.com"]
 
-  spec.summary       = "Write composable and table agnostic query objects for ActiveRecord scopes."
-  spec.description   = "Move query code from ActiveRecord models to query objects, because database query code do not belong in the model."
+  spec.summary       = "Write composable and table agnostic query objects for Active Record scopes."
+  spec.description   = "Move query code from ActiveRecord models into query objects, because database query code do not belong in the model."
   spec.homepage      = "https://github.com/RichOrElse/query_delegator"
   spec.license       = "MIT"
 

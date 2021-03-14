@@ -1,6 +1,6 @@
 # QueryDelegator
 
-Write composable and table agnostic query objects for ActiveRecord scopes. Move query code from ActiveRecord models to query objects, because database query code do not belong in the model.
+Write composable and table agnostic query objects for Active Record scopes. Move query code from `ActiveRecord` models into query objects, because database query code do not belong in the model.
 
 ## Installation
 
@@ -42,14 +42,15 @@ class ByEmail < QueryDelegator
 end
 ```
 
-Wrap scopes outside ActiveRecord models.
+Wrap scopes outside `ActiveRecord` models, by either passing the scope as an argument when instantiating a query object or
+by passing the query object class as a block argument to the scope's `then` method, also known as `yield_self`.
 
 ```ruby
 @user = ByEmail.new(User).("john.doe@example.test")
 @contacts = @user.contacts.then(&ByEmail).be(params[:email])
 ```
 
-Wrap scopes inside ActiveRecord models.
+You may also wrap scopes inside `ActiveRecord` models, like so:
 
 ```ruby
 class User < ApplicationRecord
